@@ -194,3 +194,55 @@
     - 运行完命令后，查看ddms，原来红色虫子变为绿色虫子
 
 > 注意：安卓真机大部分是使用arm架构cpu，而市面上的模拟器，如逍遥模拟器，多采用x86架构。所以在调试模拟器时，要注意的是兼容问题。在adb shell 启动android_server步骤时，android_server需要用IDA安装目录中dbgsrv文件夹中的android_x86_server替换。并且在IDA附加进程调试时，需要选择Debugger->Attach->Remote Linux debugger。
+
+## 5. frida环境配置
+### 1. frida介绍
+- Frida是一款基于python + javascript 的hook框架，适用于android/ios/linux/win/osx等平台。
+- Frida的动态代码执行功能，主要是在它的核心引擎Gum中用C语言来实现的。
+- Frida运行模式：
+    - 注入模式：大部分情况下，我们都是附加到一个已经运行到进程，或者是在程序启动到时候进行劫持，然后再在目标进程中运行我们的代码逻辑。这种方式是Frida最常用的使用方式。
+        - 注入模式的大致实现思路是这样的，带有GumJS的Frida核心引擎被打包成一个动态连接库，然后把这个动态连接库注入到目标进程中，同时提供了一个双向通信通道，这样控制端就可以和注入的模块进行通信了。
+        - 在不需要的时候，还可以在目标进程中把这个注入的模块给卸载掉。
+    - 嵌入模式：针对没root过的设备Frida提供了一个动态连接库组件 frida-gadget， 可以把这个动态库集成到程序里面来使用Frida的动态执行功能。一旦集成了gadget，就可以和程序使用Frida进行交互。
+    - 预加载模式：自动加载Js文件。
+### 2. 安装python环境
+- windows的frida目前只支持python2.7和python3.7
+- 安装python的IDE工具Pycharm
+### 3. 安装frida相关软件
+- 这里需要三个相关的软件：
+    - frida：是一个python库，里面提供了python的接口，用以使用python开发相应的hook插件
+    - frida-tools:frida命令行工具，可以通过命令行进行frida注入等操作
+    - frida-server:运行在目标端(android)的服务，必须要有这个服务才能实现frida的hook，并且需要进行端口转发
+- 安装frida：
+    - cmd中执行：pip install frida
+    - 如果慢的话，可以使用国内源安装：pip install frida -i https://pypi.tuna.tsinghua.edu.cn/simple/
+    - 安装指定版本的frida：pip install frida==12.9.4
+    - 具体的版本可以在github上查看：https://github.com/frida/frida/releases
+    - 如果之前装了frida，先要卸载之前的版本：pip uninstall frida
+- 安装frida-tools:
+    - cmd中执行：pip install frida-tools
+    - 如果慢的话，可以使用国内源安装：pip install frida-tools -i https://pypi.tuna.tsinghua.edu.cn/simple/
+    - 安装指定版本的frida-tools: pip install frida-tools==7.2.2
+    - 具体的版本可以在github上查看: https://github.com/frida/frida-tools/releases
+    - 如果之前装了frida-tools，先要卸载之前的版本:pip uninstall frida-tools
+    - 查看frida版本：frida --version
+    - 目前测试frida==12.9.4+frida-tools==7.2.2能够比较好的运行
+- 安卓下安装frida:
+    - 先查看手机处理器型号，以便下载对应的frida-server：adb shell getprop ro.product.cpu.abi
+        - 一般模拟器是x86架构，真机是arm64架构
+    - 下载对应的frida-server版本：
+        - https://github.com/frida/frida/releases
+        - 比如我使用模拟器，cpu是x86的，所以就下载frida-server-[version]-android-x86_64.xz文件，如果使用真机，cpu是arm64，就下载frida-server-[vserion]-android-arm64.xz，比如：frida-server-12.9.4-android-arm64.xz
+        - frida-server的版本尽量和frida的版本一致：
+            - 查看安装的frida版本：cmd中输入 frida --v 查看当前frida版本
+            - 然后根据这个frida版本去github上下载对应版本的frida-server
+    - 解压下载的*.xz文件，将其中的frida-server-[version]-android-cputype 文件放到android的目录下，比如放在/data/local/tmp下
+    - 在adb shell命令中进入到/data/local/tmp中，给frida-server程序相应的启动权限:chmod 777 frida-server-12.9.4-android-arm64，再启动frida
+    - 转发端口：adb forward tcp:27042 tcp:27042
+- 在Pycharm中新建一个python工程，用来运行frida：
+    - File->New Project->Pure Python
+    - 选择工程存放路径，选择python版本，如果安装了多个python版本的话，可以在base interpreter中选择，这里选择python3.7版本的就行了
+    - 一定要勾选Inherit global site-packages和Make available to all projects
+    - 点击creak就创建成功
+- 编写frida hook代码：
+    - 在工程中新建一个.py文件
