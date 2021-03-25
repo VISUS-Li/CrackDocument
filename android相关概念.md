@@ -82,7 +82,7 @@
 - React是基础框架，是一套基础设计实现理念，开发者不能直接使用它来开发移动应用或网页。
 - 在React之上发展出了React.js框架用来开发网页，发展出来React Native用来开发移动应用。
 - 因为React基础框架与React.js框架是同时出现、同时进化发展的，就造成了React基础框架的基本概念、设计思想都是在React.js的相关文档中描述的。后来，Facebook推出React Native后，也没有把React的相关概念文档从React.js文档中分离出来，就导致了学React Native要去看React.js文档。
-
+### 2. React的基本流程
 ### 2. 
 - 要导出给JavaScript使用的属性，需要申明带有@ReactProp（或@ReactPropGroup）注解的设置方法。
      * 方法的第一个参数是要修改属性的视图实例，第二个参数是要设置的属性值。
