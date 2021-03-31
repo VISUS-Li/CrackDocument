@@ -195,8 +195,8 @@
 
 > 注意：安卓真机大部分是使用arm架构cpu，而市面上的模拟器，如逍遥模拟器，多采用x86架构。所以在调试模拟器时，要注意的是兼容问题。在adb shell 启动android_server步骤时，android_server需要用IDA安装目录中dbgsrv文件夹中的android_x86_server替换。并且在IDA附加进程调试时，需要选择Debugger->Attach->Remote Linux debugger。
 
-## 5. frida环境配置
-### 1. frida介绍
+# 四、 frida环境配置
+## 1. frida介绍
 - Frida是一款基于python + javascript 的hook框架，适用于android/ios/linux/win/osx等平台。
 - Frida的动态代码执行功能，主要是在它的核心引擎Gum中用C语言来实现的。
 - Frida运行模式：
@@ -209,10 +209,10 @@
         - Frida提供了一个动态连接库组件 frida-gadget， 你可以把这个动态库集成到你程序里面来使用Frida的动态执行功能。一旦你集成了gadget，你就可以和你的程序使用Frida进行交互，并且使用 frida-trace 这样的功能，同时也支持从文件自动加载Js文件执行JS逻辑。
         - 关于 Gadget 更多功能，请参考原文链接（https://www.frida.re/docs/modes）
     - 预加载模式：自动加载Js文件。
-### 2. 安装python环境
+## 2. 安装python环境
 - windows的frida目前只支持python2.7和python3.7
 - 安装python的IDE工具Pycharm
-### 3. 安装frida相关软件
+## 3. 安装frida相关软件
 - 这里需要三个相关的软件：
     - frida：是一个python库，里面提供了python的接口，用以使用python开发相应的hook插件
     - frida-tools:frida命令行工具，可以通过命令行进行frida注入等操作
@@ -250,3 +250,28 @@
     - 点击creak就创建成功
 - 编写frida hook代码：
     - 在工程中新建一个.py文件
+
+# 五、 js调试环境
+## 1. WebView调试环境
+- 采用混合开发（hybird开发）的APP，可以在APP中嵌入网页，Android中，采用WebView控件来加载嵌入网页。高一点的Android版本，内置的WebView的内核是采用Chrome的内核，实际WebView就是一个内嵌浏览器，所以使用chrome能很好的调试。
+- 连接手机，打开开发者调试
+- 在谷歌浏览器的导航栏中输入 chrome://inspect/ ，等待连接设备
+- 在手机中的APP中，打开要调试的网页，等待chrome://inspect/ 页面中出现要调试的页面
+- 点击inspect，就可以打开devtools进行调试
+
+## 2. 普通js文件调试
+- 但是采用上述方式调试，在进入devtools开始调试时，整个页面是已经加载完成了，如果要在js刚开始加载的时候进行调试，可以采用node+devtools的方式
+- 安装chrome扩展 NIM-Node.js 调试管理工具（https://chrome.google.com/webstore/detail/nodejs-v8-inspector-manag/gnhhdgbaldcilmgcpfddgdbkhjohddkj
+）（需要翻墙，其实可以不用安装，看需求）
+- 打开chrome://inspect
+- 点击 Open dedicated DevTools for Node后，会弹出空白的devtools页面
+- 执行你的js文件
+    ```
+    node --inspect=9222 file.js（如：node --inspect=9222 subscribeBuy.e22df20c.js）
+    ```
+- 执行上一步命令是直接开始运行整个js文件，如果要在刚刚加载js文件时就断下来，可以执行命令：
+    ```
+    node --inspect-brk=9222 file.js（如：node --inspect-brk=9222 subscribeBuy.e22df20c.js）
+    ```
+- 然后打断点，开始调试
+- 参考：https://segmentfault.com/a/1190000020205396
