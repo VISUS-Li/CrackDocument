@@ -254,10 +254,12 @@
 # 五、 js调试环境
 ## 1. WebView调试环境
 - 采用混合开发（hybird开发）的APP，可以在APP中嵌入网页，Android中，采用WebView控件来加载嵌入网页。高一点的Android版本，内置的WebView的内核是采用Chrome的内核，实际WebView就是一个内嵌浏览器，所以使用chrome能很好的调试。
+- Android中发布出来的APP，一般都不会开启WebView的调试开关（要调试某个APP的WebView加载的网页，需要APP的代码中打开WebView的调试开关），所以这里需要采用一个Xposed模块来强制打开WebView的调试开关，该模块叫：WebViewDebugHook.apk。其GitHub地址是：https://github.com/feix760/WebViewDebugHook
 - 连接手机，打开开发者调试
 - 在谷歌浏览器的导航栏中输入 chrome://inspect/ ，等待连接设备
 - 在手机中的APP中，打开要调试的网页，等待chrome://inspect/ 页面中出现要调试的页面
 - 点击inspect，就可以打开devtools进行调试
+
 
 ## 2. 普通js文件调试
 - 但是采用上述方式调试，在进入devtools开始调试时，整个页面是已经加载完成了，如果要在js刚开始加载的时候进行调试，可以采用node+devtools的方式
@@ -275,3 +277,24 @@
     ```
 - 然后打断点，开始调试
 - 参考：https://segmentfault.com/a/1190000020205396
+
+## 3. 从服务器中下载下来的js
+- 从服务器上下载下来的js，如果使用node运行的话，会有一些只有浏览器才有的对象在js中使用了，而node运行时是没有的。如window对象。
+- 此时，可以考虑新建一个html文档，然后用 \<srcipt>标签来引用对应的js文件：
+```
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Title</title>
+        <script type="text/javascript"  src="subscribeBuy.e22df20c.js"></script>
+        <script type="text/javascript"  src="chunk-vendors.153482d5.js"></script>
+        <script type="text/javascript"  src="chunk-common.521dbf39.js"></script>
+    </head>
+    <body>
+    <div>xiaomiyoupin</div>
+    </body>
+    </html>
+
+```
+- 如果可以，可以将调试获得的html页面整个拷贝到本地，或者通过postman等来请求html页面的http请求获得对应的html文件，然后修改html中对js文件的引用路径，来达到可以在本地从头加载js，然后从头调试的效果。但是这种并不是很好的调试方法，只能帮助分析逻辑
