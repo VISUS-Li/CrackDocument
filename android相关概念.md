@@ -75,6 +75,32 @@
 
 ### 3. WebView相关概念
 #### Ⅰ. WebViewClient
+#### 2. android和webview的交互方式：
+##### 1. Android 触发js的addEventListener自定义事件
+- Android 端：
+``` java
+private void triggerEvnet(String eventName, String detail){
+    if(eventName==null || eventName.length()==0){
+        return;
+    }
+    if(detail==null || detail.length()==0){
+        detail = "{}"
+    }
+    String js_string = "var myevent = new CustomEvent("+ eventName +", {detail: "+ detail +"});";
+    js_string += "window.dispatchEvent(myevent);";
+    webview.loadUrl("javascript:"+js_string);
+}
+
+// 调用，例如：触发KeyboardShow事件，将键盘高度当作detail参数
+triggerEvnet("KeyboardShow","{keyboardHeight:300}");
+``` 
+　　
+- 前端：
+```js
+window.addEventListener("KeyboardShow",function(e){
+    console.log("Keyboard Height: " + e.detail.keyboardHeight)
+})
+```
 
 # 五、 React框架
 ## 一） React相关简介
@@ -95,6 +121,9 @@
      * 这些参数必须是对应的基础类型的值（也就是boolean, int, float），这些值会被传递给setter方法，
      * 以免JavaScript端某些情况下在组件中移除了对应的属性。
 - https://www.jianshu.com/p/441c21ffb64d
+
+### 4. RN 与原生安卓通信：
+- https://www.jianshu.com/p/e413e84cd28b
 
 # 六、 Android Hook
 ## 一）插桩
